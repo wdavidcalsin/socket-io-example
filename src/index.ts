@@ -1,10 +1,31 @@
-const app = require('express')();
-const http = require('http').createServer(app);
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+
+const app = express();
+const http = createServer(app);
+
+const io = new Server(http);
 
 app.get('/', (req, res) => {
-  res.send('<h1>SocketIO exmaple</h1>');
+  res.sendFile(__dirname + '/index.html');
 });
 
-http.listen(5000, () => {
-  console.log('listening on *:5000');
+io.on('connection', (socket: any) => {
+  console.log('a user connected');
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+    io.emit('chat message', msg);
+  });
+});
+
+http.listen(3000, () => {
+  console.log('listening on *:3000');
 });
